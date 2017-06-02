@@ -4,6 +4,10 @@
     {% for restaurant in restaurants %}
         <h3>
             {{ restaurant.name }}
+            <a href={{ url_for("restaurant_menu", restaurant_id=restaurant.id) }}>View Menu</a>
+            <a href={{ url_for("edit_restaurant", restaurant_id=restaurant.id) }}>Edit</a>
+            <a href={{ url_for("delete_restaurant", restaurant_id=restaurant.id) }}>Delete</a>
         </h3>
     {% endfor %}
+    <a href={{ url_for("new_restaurant") }}>New Restaurant</a>
 {% endblock %}

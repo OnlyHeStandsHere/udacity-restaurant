@@ -1,7 +1,6 @@
 from flask import Flask, render_template, url_for, redirect, request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-
 from database.db_setup import Base, MenuItem, Restaurant
 
 engine = create_engine('sqlite:///database/restaurantmenu.db')
@@ -29,19 +28,45 @@ app = Flask(__name__)
 @app.route("/restaurants/")
 def restaurant_index():
     restaurants = session.query(Restaurant).all()
-    return render_template("restaurants.html", restaurants=restaurants)
+    return render_template("restaurants.html", restaurants=restaurants, heading="Yummy Restaurants")
 
 
 # Create a new Restaurant
-@app.route("/restaurant/new")
+@app.route("/restaurant/new", methods=['GET', 'POST'])
 def new_restaurant():
-    return "A place to create new restaurants"
+    if request.method == 'POST':
+        name = request.form.get("restaurant_name")
+        if name:
+            restaurant = Restaurant(name=name)
+            session.add(restaurant)
+            session.commit()
+            return redirect(url_for("restaurant_index"))
+        else:
+            return render_template("restaurant_form.html", heading="Add A New Restaurant", restaurant_name='')
+    else:
+        return render_template("restaurant_form.html", heading="Add A New Restaurant", restaurant_name='')
 
 
 # Edit an Existing Restaurant
-@app.route("/restaurant/<int:restaurant_id>/edit")
+@app.route("/restaurant/<int:restaurant_id>/edit", methods=['GET', 'POST'])
 def edit_restaurant(restaurant_id):
-    return "Here we Edit the Restaurant"
+    restaurant = session.query(Restaurant).get(restaurant_id)
+    if restaurant:
+        if request.method == 'POST':
+            name = request.form.get("restaurant_name")
+            if name:
+                restaurant.name = name
+                session.add(restaurant)
+                session.commit()
+                return redirect(url_for("restaurant_index"))
+            else:
+                return "please submit a valid name"
+        elif request.method == 'GET':
+            return render_template("restaurant_form.html", heading="Edit This Restaurant",
+                                   restaurant_name=restaurant.name)
+    else:
+        return "Restaurant Menu not found, please submit another request"
+
 
 
 # Delete an Existing Restaurant
