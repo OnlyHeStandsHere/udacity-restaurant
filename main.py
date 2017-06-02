@@ -1,14 +1,23 @@
-from flask import Flask
+from flask import Flask, render_template, url_for, redirect, request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database.db_setup import Base, Restaurant, MenuItem
 
-engine = create_engine('sqlite:///restaurantmenu.db')
+from database.db_setup import Base, MenuItem, Restaurant
+
+engine = create_engine('sqlite:///database/restaurantmenu.db')
 # Bind the engine to the metadata of the Base class so that the
 # declaratives can be accessed through a DBSession instance
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
+# A DBSession() instance establishes all conversations with the database
+# and represents a "staging zone" for all the objects loaded into the
+# database session object. Any change made against the objects in the
+# session won't be persisted into the database until you call
+# session.commit(). If you're not happy about the changes, you can
+# revert all of them back to the last commit by calling
+# session.rollback()
+
 session = DBSession()
 
 
@@ -19,7 +28,8 @@ app = Flask(__name__)
 @app.route('/')
 @app.route("/restaurants/")
 def restaurant_index():
-    return 'Home page for all restaurants'
+    restaurants = session.query(Restaurant).all()
+    return render_template("restaurants.html", restaurants=restaurants)
 
 
 # Create a new Restaurant
@@ -65,4 +75,5 @@ def delete_menu_item(restaurant_id, menu_id):
 
 
 if __name__ == '__main__':
+    app.debug = True
     app.run()
