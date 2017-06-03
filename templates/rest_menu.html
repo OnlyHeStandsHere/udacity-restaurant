@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>template is woring</h2>
+    {% for item in restaurant.menu_items %}
+        <h4>{{ item.name }}</h4>
+        <div>
+            {{ item.desc }}<br>
+            {{ item.price }}<br>
+        </div>
+    {% endfor %}
+
+{% endblock %}

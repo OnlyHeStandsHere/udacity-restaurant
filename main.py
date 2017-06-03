@@ -68,17 +68,27 @@ def edit_restaurant(restaurant_id):
         return "Restaurant Menu not found, please submit another request"
 
 
-
 # Delete an Existing Restaurant
-@app.route("/restaurant/<int:restaurant_id>/delete")
+@app.route("/restaurant/<int:restaurant_id>/delete", methods=['GET', 'POST'])
 def delete_restaurant(restaurant_id):
-    return "Here we delete the Restaurant"
+    restaurant = session.query(Restaurant).get(restaurant_id)
+    if restaurant:
+        if request.method == 'POST':
+            session.delete(restaurant)
+            session.commit()
+            return redirect(url_for("restaurant_index"))
+        elif request.method == 'GET':
+            return render_template("delete_restaurant.html", heading="Delete A Restaurant", restaurant=restaurant)
+    else:
+        return redirect("restaurant_index")
 
 
 # An Index of all Menu Items for a given restaurant
 @app.route("/restaurant/<int:restaurant_id>/menu")
 def restaurant_menu(restaurant_id):
-    return "A place to show all restaurant menu items"
+    restaurant = session.query(Restaurant).get(restaurant_id)
+    return render_template("rest_menu.html", restaurant=restaurant, header=restaurant.name)
+
 
 
 # A Place to add a new menu item for a given restaurant
